@@ -1,13 +1,22 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Home } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Hotel, AlertCircle, CheckCircle2 } from "lucide-react";
+import { SignupForm } from "./signup-form";
+import { ThemeToggle } from "@/components/theme-toggle";
 
-export default async function SignupPage() {
+type SearchParams = {
+  error?: string;
+  message?: string;
+};
+
+export default async function SignupPage({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -29,13 +38,18 @@ export default async function SignupPage() {
     }
   }
 
+  const params = await searchParams;
+  const error = params.error;
+  const message = params.message;
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md relative">
+        <ThemeToggle className="absolute top-4 right-4" />
         <CardHeader className="space-y-1">
           <div className="flex items-center justify-center mb-4">
             <div className="flex items-center gap-2">
-              <Home className="h-6 w-6 text-primary" />
+              <Hotel className="h-6 w-6 text-primary" />
               <span className="text-2xl font-bold">Holistay</span>
             </div>
           </div>
@@ -45,47 +59,22 @@ export default async function SignupPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form action="/auth/signup" method="post">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="full_name">Nome Completo</Label>
-                <Input
-                  id="full_name"
-                  name="full_name"
-                  type="text"
-                  placeholder="João Silva"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="seu@email.com"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Senha</Label>
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  placeholder="••••••••"
-                  required
-                  minLength={6}
-                />
-              </div>
-              <Button type="submit" className="w-full">
-                Criar Conta
-              </Button>
-            </div>
-          </form>
+          {error && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{decodeURIComponent(error)}</AlertDescription>
+            </Alert>
+          )}
+          {message && (
+            <Alert className="mb-4">
+              <CheckCircle2 className="h-4 w-4" />
+              <AlertDescription>{decodeURIComponent(message)}</AlertDescription>
+            </Alert>
+          )}
+          <SignupForm />
           <div className="mt-4 text-center text-sm">
             <span className="text-muted-foreground">Já tem uma conta? </span>
-            <Link href="/login" className="text-primary hover:underline">
+            <Link href="/login" className="text-primary hover:underline hover:text-primary/90 transition-all duration-200 font-medium">
               Entrar
             </Link>
           </div>

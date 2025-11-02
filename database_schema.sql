@@ -181,7 +181,7 @@ BEGIN
   VALUES (NEW.id, NEW.raw_user_meta_data->>'full_name', NEW.raw_user_meta_data->>'avatar_url', 'manager'); -- Define 'manager' como role padrão
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Aplicar o Trigger de novo usuário
 CREATE TRIGGER on_auth_user_created

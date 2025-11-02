@@ -15,7 +15,7 @@ export async function POST(request: Request) {
 
   if (error) {
     return NextResponse.redirect(
-      new URL("/login?error=Invalid credentials", request.url)
+      new URL("/login?error=Credenciais inválidas. Verifique seu email e senha.", request.url)
     );
   }
 

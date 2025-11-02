@@ -28,7 +28,7 @@ export async function POST(request: Request) {
   // After signup, the trigger will create the profile
   // We redirect to login with a success message
   return NextResponse.redirect(
-    new URL("/login?message=Account created successfully. Please sign in.", request.url)
+    new URL("/login?message=Conta criada com sucesso! Verifique seu email e clique no link de confirmação para ativar sua conta. Após confirmar, você poderá fazer login.", request.url)
   );
 }
 

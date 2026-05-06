@@ -6,8 +6,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Holistay - Property Management",
-  description: "Manage your Airbnb properties efficiently",
+  title: "Holistay — Gestão de Imóveis",
+  description: "Gerencie seus imóveis por temporada com eficiência",
 };
 
 export default function RootLayout({
@@ -17,7 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className={`${inter.className} dark`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"

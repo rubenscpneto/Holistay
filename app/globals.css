@@ -2,25 +2,34 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 142.1 76.2% 36.3%;
+    /* Dark mode obrigatório (Glassmorphism 2.0) */
+    --background: 207.7 22.8% 11.2%; /* Deep Slate #161d23 */
+    --foreground: 210 40% 98%;
+
+    /* Superfícies (combinadas com alpha via classes glass) */
+    --card: 207.7 22.8% 11.2%;
+    --card-foreground: 210 40% 98%;
+    --popover: 207.7 22.8% 11.2%;
+    --popover-foreground: 210 40% 98%;
+
+    /* Marca */
+    --primary: 167.2 20% 46.1%; /* Sea Pine #5e8d83 */
     --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 142.1 76.2% 36.3%;
+    --secondary: 169.6 11.7% 38.6%; /* Muted Emerald #576e6a */
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 210 18% 16%;
+    --muted-foreground: 215 20.2% 70%;
+    --accent: 210 18% 16%;
+    --accent-foreground: 210 40% 98%;
+
+    /* Alertas (Amber Gold) */
+    --destructive: 47.6 90.8% 47.1%; /* #e5b80b */
+    --destructive-foreground: 222.2 84% 4.9%;
+
+    --border: 210 18% 18%;
+    --input: 210 18% 18%;
+    --ring: 167.2 20% 46.1%;
     --radius: 0.5rem;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
@@ -30,30 +39,26 @@
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
+    /* Mantido por compatibilidade: tokens já são dark por padrão */
+    --background: 207.7 22.8% 11.2%;
     --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
+    --card: 207.7 22.8% 11.2%;
     --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
+    --popover: 207.7 22.8% 11.2%;
     --popover-foreground: 210 40% 98%;
-    --primary: 142.1 76.2% 36.3%;
+    --primary: 167.2 20% 46.1%;
     --primary-foreground: 210 40% 98%;
-    --secondary: 217.2 32.6% 17.5%;
+    --secondary: 169.6 11.7% 38.6%;
     --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
+    --muted: 210 18% 16%;
+    --muted-foreground: 215 20.2% 70%;
+    --accent: 210 18% 16%;
     --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 142.1 76.2% 36.3%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    --destructive: 47.6 90.8% 47.1%;
+    --destructive-foreground: 222.2 84% 4.9%;
+    --border: 210 18% 18%;
+    --input: 210 18% 18%;
+    --ring: 167.2 20% 46.1%;
   }
 
   * {
@@ -63,6 +68,20 @@
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    @apply bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl;
+  }
+
+  .glass-panel-hover {
+    @apply transition-[transform,background-color,box-shadow] duration-200 hover:bg-white/[0.07] hover:-translate-y-px hover:shadow-lg;
+  }
+
+  .glass-input {
+    @apply bg-white/5 border-white/10 placeholder:text-white/45;
   }
 }
 

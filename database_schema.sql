@@ -1,6 +1,13 @@
 -- HOLISTAY DB BLUEPRINT V1.0
 -- Este script cria todas as tabelas, tipos, funções e políticas de segurança (RLS).
 
+-- ========== PRÉ-REQUISITOS ==========
+-- Extensão usada por gen_random_uuid()
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+-- Schema privado para funções SECURITY DEFINER (boa prática Supabase)
+CREATE SCHEMA IF NOT EXISTS app_private;
+
 -- ========== ETAPA 1: CRIAÇÃO DOS TIPOS (ENUMs) ==========
 
 -- Remove tipos antigos se existirem, para permitir re-execução (em desenvolvimento)
@@ -174,19 +181,19 @@ CREATE TRIGGER on_tasks_update
   FOR EACH ROW EXECUTE PROCEDURE public.handle_updated_at();
 
 -- Função para criar um `profile` quando um novo usuário se cadastra no `auth.users`
-CREATE OR REPLACE FUNCTION public.handle_new_user()
+CREATE OR REPLACE FUNCTION app_private.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
   INSERT INTO public.profiles (id, full_name, avatar_url, role)
   VALUES (NEW.id, NEW.raw_user_meta_data->>'full_name', NEW.raw_user_meta_data->>'avatar_url', 'manager'); -- Define 'manager' como role padrão
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, auth;
 
 -- Aplicar o Trigger de novo usuário
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
+  FOR EACH ROW EXECUTE PROCEDURE app_private.handle_new_user();
 
 
 -- ========== ETAPA 4: POLÍTICAS DE SEGURANÇA (ROW LEVEL SECURITY) ==========
@@ -226,53 +233,53 @@ CREATE POLICY "Managers podem deletar seus imóveis." ON public.properties
 --    Estas tabelas usam a mesma lógica: Acesso total para o Manager, Acesso de Leitura para o Owner.
 
 -- Criar uma função auxiliar para checar se o usuário é Manager de um imóvel
-CREATE OR REPLACE FUNCTION public.is_manager_of_property(property_id_to_check uuid)
+CREATE OR REPLACE FUNCTION app_private.is_manager_of_property(property_id_to_check uuid)
 RETURNS BOOLEAN AS $$
   SELECT EXISTS (
     SELECT 1
     FROM public.properties
     WHERE id = property_id_to_check AND manager_id = auth.uid()
   );
-$$ LANGUAGE sql SECURITY DEFINER;
+$$ LANGUAGE sql SECURITY DEFINER SET search_path = public, auth;
 
 -- Criar uma função auxiliar para checar se o usuário tem acesso (Manager ou Owner) a um imóvel
-CREATE OR REPLACE FUNCTION public.can_view_property(property_id_to_check uuid)
+CREATE OR REPLACE FUNCTION app_private.can_view_property(property_id_to_check uuid)
 RETURNS BOOLEAN AS $$
   SELECT EXISTS (
     SELECT 1
     FROM public.properties
     WHERE id = property_id_to_check AND (manager_id = auth.uid() OR owner_id = auth.uid())
   );
-$$ LANGUAGE sql SECURITY DEFINER;
+$$ LANGUAGE sql SECURITY DEFINER SET search_path = public, auth;
 
 -- Aplicar políticas usando as funções (para `fixed_costs`, `bookings`, `expenses`, `tasks`)
 -- A lógica é a mesma para todas elas:
 CREATE POLICY "Managers/Owners podem ver dados de seus imóveis." ON public.fixed_costs
-  FOR SELECT USING (public.can_view_property(property_id));
+  FOR SELECT USING (app_private.can_view_property(property_id));
 CREATE POLICY "Managers podem modificar dados de seus imóveis." ON public.fixed_costs
-  FOR ALL USING (public.is_manager_of_property(property_id));
+  FOR ALL USING (app_private.is_manager_of_property(property_id));
 
 CREATE POLICY "Managers/Owners podem ver dados de seus imóveis." ON public.bookings
-  FOR SELECT USING (public.can_view_property(property_id));
+  FOR SELECT USING (app_private.can_view_property(property_id));
 CREATE POLICY "Managers podem modificar dados de seus imóveis." ON public.bookings
-  FOR ALL USING (public.is_manager_of_property(property_id));
+  FOR ALL USING (app_private.is_manager_of_property(property_id));
 
 CREATE POLICY "Managers/Owners podem ver dados de seus imóveis." ON public.expenses
-  FOR SELECT USING (public.can_view_property(property_id));
+  FOR SELECT USING (app_private.can_view_property(property_id));
 CREATE POLICY "Managers podem modificar dados de seus imóveis." ON public.expenses
-  FOR ALL USING (public.is_manager_of_property(property_id));
+  FOR ALL USING (app_private.is_manager_of_property(property_id));
 
 CREATE POLICY "Managers/Owners podem ver dados de seus imóveis." ON public.tasks
-  FOR SELECT USING (public.can_view_property(property_id));
+  FOR SELECT USING (app_private.can_view_property(property_id));
 CREATE POLICY "Managers podem modificar dados de seus imóveis." ON public.tasks
-  FOR ALL USING (public.is_manager_of_property(property_id));
+  FOR ALL USING (app_private.is_manager_of_property(property_id));
 
 
 -- 5. Tabelas `checklist_items` e `task_comments`
 --    Estas tabelas dependem do acesso à `task` principal.
 
 -- Função auxiliar para checar acesso à tarefa (indiretamente pelo imóvel)
-CREATE OR REPLACE FUNCTION public.can_view_task(task_id_to_check uuid)
+CREATE OR REPLACE FUNCTION app_private.can_view_task(task_id_to_check uuid)
 RETURNS BOOLEAN AS $$
   SELECT EXISTS (
     SELECT 1
@@ -280,10 +287,10 @@ RETURNS BOOLEAN AS $$
     JOIN public.properties p ON t.property_id = p.id
     WHERE t.id = task_id_to_check AND (p.manager_id = auth.uid() OR p.owner_id = auth.uid())
   );
-$$ LANGUAGE sql SECURITY DEFINER;
+$$ LANGUAGE sql SECURITY DEFINER SET search_path = public, auth;
 
 -- Função auxiliar para checar se é manager da tarefa (indiretamente pelo imóvel)
-CREATE OR REPLACE FUNCTION public.is_manager_of_task(task_id_to_check uuid)
+CREATE OR REPLACE FUNCTION app_private.is_manager_of_task(task_id_to_check uuid)
 RETURNS BOOLEAN AS $$
   SELECT EXISTS (
     SELECT 1
@@ -291,15 +298,15 @@ RETURNS BOOLEAN AS $$
     JOIN public.properties p ON t.property_id = p.id
     WHERE t.id = task_id_to_check AND p.manager_id = auth.uid()
   );
-$$ LANGUAGE sql SECURITY DEFINER;
+$$ LANGUAGE sql SECURITY DEFINER SET search_path = public, auth;
 
 -- Aplicar políticas
 CREATE POLICY "Managers/Owners podem ver itens de tarefas." ON public.checklist_items
-  FOR SELECT USING (public.can_view_task(task_id));
+  FOR SELECT USING (app_private.can_view_task(task_id));
 CREATE POLICY "Managers podem modificar itens de tarefas." ON public.checklist_items
-  FOR ALL USING (public.is_manager_of_task(task_id));
+  FOR ALL USING (app_private.is_manager_of_task(task_id));
 
 CREATE POLICY "Managers/Owners podem ver comentários de tarefas." ON public.task_comments
-  FOR SELECT USING (public.can_view_task(task_id));
+  FOR SELECT USING (app_private.can_view_task(task_id));
 CREATE POLICY "Managers podem modificar comentários de tarefas." ON public.task_comments
-  FOR ALL USING (public.is_manager_of_task(task_id));
+  FOR ALL USING (app_private.is_manager_of_task(task_id));

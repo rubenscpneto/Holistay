@@ -40,6 +40,32 @@ export function formatDateRangePtBR(
   return `${startStr} – ${endStr}`;
 }
 
+export function formatDueLabelPtBR(input: Date | string): string {
+  const d = typeof input === "string" ? new Date(input) : input;
+  const now = new Date();
+
+  const startToday = new Date(now);
+  startToday.setHours(0, 0, 0, 0);
+  const startTomorrow = new Date(startToday);
+  startTomorrow.setDate(startTomorrow.getDate() + 1);
+  const startDayAfter = new Date(startTomorrow);
+  startDayAfter.setDate(startDayAfter.getDate() + 1);
+
+  const time = d.toLocaleTimeString("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  if (d >= startToday && d < startTomorrow) return `Hoje, ${time}`;
+  if (d >= startTomorrow && d < startDayAfter) return `Amanhã, ${time}`;
+
+  const date = d.toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "short",
+  });
+  return `${date}, ${time}`;
+}
+
 export function monthLabelPtBR(date: Date): string {
   return date.toLocaleDateString("pt-BR", {
     month: "long",

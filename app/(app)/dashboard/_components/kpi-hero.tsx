@@ -38,29 +38,24 @@ export function KpiHero({
   kpis: MonthKpis;
   monthRef: Date;
 }) {
-  const revDelta = pctDelta(kpis.totalRevenue, kpis.prevTotalRevenue);
   const occDelta = pctDelta(kpis.occupancyPct, kpis.prevOccupancyPct);
-  const adrDelta = pctDelta(kpis.adr, kpis.prevAdr);
-  const revparDelta = pctDelta(kpis.revpar, kpis.prevRevpar);
 
-  const netProjected = kpis.netProjected ?? 0;
-  const checkins24h = kpis.checkins24h ?? 0;
+  const checkinsHoje = (kpis as MonthKpis & { checkinsHoje?: number }).checkinsHoje ?? 0;
+  const checkoutsHoje = (kpis as MonthKpis & { checkoutsHoje?: number }).checkoutsHoje ?? 0;
   const overdueCleanings = kpis.overdueCleanings ?? 0;
-  const netDeltaHint =
-    kpis.totalRevenue > 0 ? `${Math.round((netProjected / kpis.totalRevenue) * 100)}% líquido` : "—";
 
   const label = capitalizeFirstPtBR(monthLabelPtBR(monthRef));
 
   return (
-    <GlassCard className="lg:col-span-8 lg:row-span-2" padding="lg">
+    <GlassCard className="md:col-span-2 lg:col-span-2 lg:row-span-2" padding="lg">
       <div className="flex flex-col gap-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h2 className="text-xl font-semibold tracking-tight">
-              Visão Geral de Desempenho
+              Operação do dia
             </h2>
             <p className="mt-1 text-sm text-white/55">
-              Receita, ocupação e RevPAR consolidados dos seus imóveis.
+              Chegadas, saídas, ocupação e receita do mês.
             </p>
           </div>
           <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium text-white/80">
@@ -68,21 +63,32 @@ export function KpiHero({
           </span>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2">
           <div className="rounded-xl border border-white/10 bg-black/20 p-4">
             <p className="text-[11px] font-semibold uppercase tracking-wider text-white/45">
-              Receita total
+              Check-ins hoje
             </p>
             <p className="mt-2 text-2xl font-bold tabular-nums">
-              {formatBRL(kpis.totalRevenue)}
+              {checkinsHoje}
             </p>
-            <div className="mt-3">
-              <TrendChip value={revDelta} />
-            </div>
+            <p className="mt-2 text-xs text-white/50">
+              Chegadas previstas para hoje
+            </p>
           </div>
           <div className="rounded-xl border border-white/10 bg-black/20 p-4">
             <p className="text-[11px] font-semibold uppercase tracking-wider text-white/45">
-              Taxa de ocupação
+              Check-outs hoje
+            </p>
+            <p className="mt-2 text-2xl font-bold tabular-nums">
+              {checkoutsHoje}
+            </p>
+            <p className="mt-2 text-xs text-white/50">
+              Saídas previstas para hoje
+            </p>
+          </div>
+          <div className="rounded-xl border border-white/10 bg-black/20 p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-white/45">
+              Taxa de ocupação atual
             </p>
             <p className="mt-2 text-2xl font-bold tabular-nums">
               {kpis.occupancyPct}%
@@ -93,49 +99,18 @@ export function KpiHero({
           </div>
           <div className="rounded-xl border border-white/10 bg-black/20 p-4">
             <p className="text-[11px] font-semibold uppercase tracking-wider text-white/45">
-              ADR (média / noite)
+              Receita do mês
             </p>
             <p className="mt-2 text-2xl font-bold tabular-nums">
-              {formatBRL(kpis.adr)}
+              {formatBRL(kpis.totalRevenue)}
             </p>
-            <div className="mt-3">
-              <TrendChip value={adrDelta} />
-            </div>
-          </div>
-          <div className="rounded-xl border border-white/10 bg-black/20 p-4">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-white/45">
-              RevPAR (por noite disponível)
+            <p className="mt-2 text-xs text-white/50">
+              Visão de alto nível (bruta)
             </p>
-            <p className="mt-2 text-2xl font-bold tabular-nums">
-              {formatBRL(kpis.revpar)}
-            </p>
-            <div className="mt-3">
-              <TrendChip value={revparDelta} />
-            </div>
           </div>
         </div>
 
-        <div className="grid gap-3 border-t border-white/10 pt-4 sm:grid-cols-3">
-          <div className="rounded-xl border border-white/10 bg-white/3 p-3">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-white/45">
-              Líquido projetado
-            </p>
-            <p className="mt-1 text-lg font-semibold tabular-nums text-white/85">
-              {formatBRL(netProjected)}
-            </p>
-            <p className="mt-1 text-xs text-white/50">{netDeltaHint}</p>
-          </div>
-          <div className="rounded-xl border border-white/10 bg-white/3 p-3">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-white/45">
-              Check-ins (24h)
-            </p>
-            <p className="mt-1 text-lg font-semibold tabular-nums text-white/85">
-              {checkins24h}
-            </p>
-            <p className="mt-1 text-xs text-white/50">
-              Chegadas previstas para as próximas 24 horas
-            </p>
-          </div>
+        <div className="grid gap-3 border-t border-white/10 pt-4 sm:grid-cols-1">
           <div className="rounded-xl border border-white/10 bg-white/3 p-3">
             <p className="text-[11px] font-semibold uppercase tracking-wider text-white/45">
               Limpezas em atraso

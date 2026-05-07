@@ -4,13 +4,13 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const glassCardVariants = cva(
-  "rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-sm transition-all duration-200 text-card-foreground",
+  "rounded-2xl border border-white/10 bg-slate-900/40 backdrop-blur-xl text-card-foreground transition-all duration-200 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] shadow-black/30",
   {
     variants: {
       tone: {
         default: "",
-        emphasis: "bg-white/[0.07] border-white/15",
-        accent: "border-amberGold/30 bg-amberGold/5",
+        emphasis: "bg-slate-900/50 border-white/15",
+        accent: "border-amberGold/30 bg-amberGold/10",
       },
       interactive: {
         true: "hover:bg-white/[0.08] hover:-translate-y-px hover:shadow-lg cursor-pointer",

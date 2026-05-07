@@ -11,6 +11,7 @@ import { CleaningProgress } from "./_components/cleaning-progress";
 import { KpiHero } from "./_components/kpi-hero";
 import { RecentMessagesWidget } from "./_components/recent-messages";
 import { TariffFluctuation } from "./_components/tariff-fluctuation";
+import { UrgentAlerts } from "./_components/urgent-alerts";
 
 export default async function DashboardPage() {
   const monthRef = new Date();
@@ -37,6 +38,18 @@ export default async function DashboardPage() {
   startToday.setHours(0, 0, 0, 0);
   const endToday = new Date();
   endToday.setHours(23, 59, 59, 999);
+
+  const checkinsHoje = portfolio.bookings.filter((b) => {
+    if (b.status === "cancelled") return false;
+    const s = new Date(b.start_date);
+    return s >= startToday && s <= endToday;
+  }).length;
+
+  const checkoutsHoje = portfolio.bookings.filter((b) => {
+    if (b.status === "cancelled") return false;
+    const e = new Date(b.end_date);
+    return e >= startToday && e <= endToday;
+  }).length;
 
   const tc = portfolio.tasks.filter((t) => {
     if (t.type !== "cleaning") return false;
@@ -66,10 +79,21 @@ export default async function DashboardPage() {
     return new Date(t.due_date) < now;
   }).length;
 
+  const overdueCleaningTask = portfolio.tasks.find((t) => {
+    if (t.type !== "cleaning") return false;
+    if (t.status === "done") return false;
+    return new Date(t.due_date) < now;
+  });
+  const overdueCleaningPropertyName = overdueCleaningTask
+    ? portfolio.properties.find((p) => p.id === overdueCleaningTask.property_id)
+        ?.name ?? null
+    : null;
+
   const kpisExtended = {
     ...kpis,
     netProjected: finance.netProjected,
-    checkins24h,
+    checkinsHoje,
+    checkoutsHoje,
     overdueCleanings,
   };
 
@@ -94,8 +118,12 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:auto-rows-[minmax(140px,auto)] lg:grid-cols-12">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3 lg:auto-rows-[minmax(140px,auto)] lg:grid-cols-4">
         <KpiHero kpis={kpisExtended} monthRef={monthRef} />
+        <UrgentAlerts
+          overdueCleanings={overdueCleanings}
+          overdueCleaningPropertyName={overdueCleaningPropertyName}
+        />
         <CleaningProgress
           done={cleaningDone}
           total={cleaningTotal}

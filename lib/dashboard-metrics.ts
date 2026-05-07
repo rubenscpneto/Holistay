@@ -63,7 +63,8 @@ export type MonthKpis = {
    * Optional dashboard-only extensions (computed outside the KPI function).
    */
   netProjected?: number;
-  checkins24h?: number;
+  checkinsHoje?: number;
+  checkoutsHoje?: number;
   overdueCleanings?: number;
   prevTotalRevenue: number;
   prevOccupancyPct: number;

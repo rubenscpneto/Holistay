@@ -10,7 +10,7 @@ export function TariffFluctuation({
   overallAvg: number;
 }) {
   return (
-    <GlassCard className="lg:col-span-8" padding="md">
+    <GlassCard className="md:col-span-3 lg:col-span-2" padding="md">
       <div className="flex flex-col gap-4">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
@@ -28,7 +28,7 @@ export function TariffFluctuation({
             >
               <div className="flex h-28 w-full flex-col justify-end rounded-lg bg-black/25 px-1 pt-2">
                 <div
-                  className="mx-auto w-[70%] min-h-[4px] rounded-t-md bg-linear-to-t from-primary to-primary/60 transition-all"
+                  className="mx-auto w-[70%] min-h-[4px] rounded-t-md bg-linear-to-t from-seaPine to-seaPine/60 transition-all"
                   style={{
                     height: `${Math.max(8, (d.avgPerNight / d.max) * 100)}%`,
                   }}

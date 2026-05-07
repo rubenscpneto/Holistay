@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 import type { Tables } from "@/types/supabase";
 import { updateTaskStatus } from "@/app/(app)/tasks/actions";
-import { formatDatePtBR } from "@/lib/format";
+import { formatDueLabelPtBR } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -87,7 +87,7 @@ export function TaskCard({ task }: { task: TaskWithRelations }) {
           {typeLabels[task.type] ?? task.type}
         </Badge>
         <span className="text-[11px] text-white/45">
-          Vence {formatDatePtBR(due, { hour: "2-digit", minute: "2-digit" })}
+          Vence {formatDueLabelPtBR(due)}
         </span>
       </div>
 

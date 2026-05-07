@@ -31,12 +31,14 @@ export function RecentMessagesWidget() {
     };
   }, []);
 
+  const unreadItems = items.filter((c) => (c.unread ?? 0) > 0);
+
   return (
-    <GlassCard className="lg:col-span-4" padding="md">
+    <GlassCard className="md:col-span-2 lg:col-span-2" padding="md">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <h3 className="text-lg font-semibold">Mensagens recentes</h3>
-          <p className="text-sm text-white/55">Últimas conversas da caixa de entrada</p>
+          <h3 className="text-lg font-semibold">Mensagens não lidas</h3>
+          <p className="text-sm text-white/55">Priorize respostas pendentes</p>
         </div>
         <Link href="/messages">
           <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" aria-label="Abrir mensagens">
@@ -48,8 +50,12 @@ export function RecentMessagesWidget() {
       <ul className="mt-4 space-y-3">
         {items.length === 0 ? (
           <li className="text-sm text-white/55">Carregando…</li>
+        ) : unreadItems.length === 0 ? (
+          <li className="rounded-xl border border-white/10 bg-white/3 p-3 text-sm text-white/55">
+            Nenhuma mensagem não lida no momento.
+          </li>
         ) : (
-          items.map((c) => (
+          unreadItems.map((c) => (
             <li
               key={c.id}
               className="flex items-start gap-3 rounded-xl border border-white/10 bg-black/20 p-3"
@@ -61,7 +67,13 @@ export function RecentMessagesWidget() {
               </Avatar>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
-                  <p className="truncate font-medium">{c.guestName}</p>
+                  <div className="flex min-w-0 items-center gap-2">
+                    <span
+                      className="h-2 w-2 shrink-0 rounded-full bg-amberGold ring-2 ring-amberGold/20"
+                      aria-hidden="true"
+                    />
+                    <p className="truncate font-medium">{c.guestName}</p>
+                  </div>
                   <span className="shrink-0 text-xs text-white/45">{c.lastTime}</span>
                 </div>
                 <p className="truncate text-sm text-white/55">{c.lastMessage}</p>

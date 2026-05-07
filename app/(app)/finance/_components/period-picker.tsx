@@ -3,6 +3,7 @@
 import * as React from "react";
 import { CalendarDays, Check, ChevronDown } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
+import type { DateRange } from "react-day-picker";
 
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
@@ -66,17 +67,16 @@ export function PeriodPicker({
 
   const initialMode: Mode = start && end ? "range" : "month";
   const [mode, setMode] = React.useState<Mode>(initialMode);
-  const [draftRange, setDraftRange] = React.useState<{ from?: Date; to?: Date }>({
-    from: start ?? undefined,
-    to: end ?? undefined,
-  });
+  const [draftRange, setDraftRange] = React.useState<DateRange | undefined>(
+    start && end ? { from: start, to: end } : undefined
+  );
 
   React.useEffect(() => {
     const newStart = parseDateParam(searchParams.get("start"));
     const newEnd = parseDateParam(searchParams.get("end"));
     const nextMode: Mode = newStart && newEnd ? "range" : "month";
     setMode(nextMode);
-    setDraftRange({ from: newStart ?? undefined, to: newEnd ?? undefined });
+    setDraftRange(newStart && newEnd ? { from: newStart, to: newEnd } : undefined);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
@@ -104,7 +104,7 @@ export function PeriodPicker({
   const monthOptions = React.useMemo(() => buildRecentMonths(12), []);
 
   const rangeLabel =
-    draftRange.from && draftRange.to
+    draftRange?.from && draftRange?.to
       ? formatDateRangePtBR(draftRange.from, draftRange.to)
       : "Selecionar intervalo";
 
@@ -155,7 +155,10 @@ export function PeriodPicker({
             <Button
               type="button"
               variant="outline"
-              className={cn("h-10 gap-2 border-white/10 bg-white/3", !draftRange.from && "text-white/55")}
+              className={cn(
+                "h-10 gap-2 border-white/10 bg-white/3",
+                !draftRange?.from && "text-white/55"
+              )}
             >
               {rangeLabel}
               <ChevronDown className="h-4 w-4 opacity-70" />
@@ -226,7 +229,7 @@ export function PeriodPicker({
               mode="range"
               numberOfMonths={2}
               selected={draftRange}
-              onSelect={(r) => setDraftRange(r ?? {})}
+              onSelect={(r) => setDraftRange(r ?? undefined)}
             />
 
             <div className="flex items-center justify-between gap-2 pt-3">
@@ -247,9 +250,9 @@ export function PeriodPicker({
                 type="button"
                 size="sm"
                 className="gap-2"
-                disabled={!draftRange.from || !draftRange.to}
+                disabled={!draftRange?.from || !draftRange?.to}
                 onClick={() => {
-                  if (!draftRange.from || !draftRange.to) return;
+                  if (!draftRange?.from || !draftRange?.to) return;
                   setRange(draftRange.from, draftRange.to);
                 }}
               >
